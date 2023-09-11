@@ -143,6 +143,10 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(700, 500, "OpenGL", NULL, NULL);
@@ -181,7 +185,11 @@ int main(void)
         2,3,0
     };
 
-
+    // vertex buffer, is used to store the vertex data in an array and render them
+    unsigned int vbo;
+    GLDebugger(glGenVertexArrays(1,&vbo));
+    GLDebugger(glBindVertexArray(vbo);)
+        
 
     unsigned int buffer;
     // generate buffer for gpu to work with
@@ -190,10 +198,11 @@ int main(void)
     glGenBuffers(1, &buffer);
     // select the buffer that we have created
     // this is the array of buffer, buffer is the id.
+    // GL_ARRAY_BUFFER target means that binding the buffer for vertex attribute data
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     // insert the data to this buffer.
     // opengl know which buffer it need to insert the data by the first argument, which is GL_ARRAY_BUFFER 
-    glBufferData(GL_ARRAY_BUFFER, 6 *2* sizeof(float), position, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 4 *2* sizeof(float), position, GL_STATIC_DRAW);
 
     // so bascially, in each vertext, we have multiple attributes like position, color, texture
     // tell opengl what the layout of our data
@@ -213,6 +222,7 @@ int main(void)
     // get a new buffer for the index buffer
     unsigned int ibo;
     glGenBuffers(1, &ibo);
+    // GL_ELEMENT_ARRAY_BUFFER target is used for index data that defines the order in which vertices are rendered 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), IndexBuffer, GL_STATIC_DRAW);
     
