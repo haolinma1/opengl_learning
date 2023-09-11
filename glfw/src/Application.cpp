@@ -155,6 +155,8 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     
+    glfwSwapInterval(1);
+
     if (glewInit() != GLEW_OK) {
         std::cout << "there are some error" << std::endl;
     }
@@ -219,9 +221,23 @@ int main(void)
     
     unsigned int shader = creatShader(shaderFile.vertex, shaderFile.fragment);
     glUseProgram(shader);
+
+    // Uniform:
+    // must be after the glUserProgram
+    // need to get the location of that uniform first
+    GLDebugger(int location = glGetUniformLocation(shader, "u_Color"));
+    // 4 stands for how many floating number
+    // f stands for floating number
+    GLDebugger(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+
+
+
+
    //enable the vertext array
     glEnableVertexAttribArray(0);
 
+    float r = 0.0f;
+    float increment = 0.05f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -231,9 +247,19 @@ int main(void)
 
         // count means how many points we want to draw
         // must be GL_UNSIGNED_INT
-        
+        GLDebugger(glUniform4f(location, r, 0.3f, 0.8f, 1.0f))
         GLDebugger(glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,NULL));
         
+        if (r>1.0)
+        {
+            increment = -0.05;
+        }
+        else if (r<0.0)
+        {
+            increment = 0.05;
+        }
+        r += increment;
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
