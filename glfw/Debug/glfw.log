@@ -1,4 +1,6 @@
 ﻿  Application.cpp
-C:\Users\haolin\Desktop\glfw\glfw\glfw\src\Application.cpp(223,34): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\haolin\Desktop\glfw\glfw\glfw\src\Application.cpp(227,33): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\haolin\Desktop\glfw\glfw\glfw\src\Application.cpp(225,34): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\haolin\Desktop\glfw\glfw\glfw\src\Application.cpp(229,33): warning C4305: '=': truncation from 'double' to 'float'
+  VertexArray.cpp
+  Generating Code...
   glfw.vcxproj -> C:\Users\haolin\Desktop\glfw\glfw\Debug\glfw.exe

@@ -7,6 +7,8 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexBufferLayout.h"
+#include "VertexArray.h"
 // to return two string from the function getShader
 struct ShaderProgramSource {
     std::string vertex;
@@ -155,10 +157,7 @@ int main(void)
         2,3,0
     };
 
-    // vertex buffer, is used to store the vertex data in an array and render them
-    unsigned int vbo;
-    GLDebugger(glGenVertexArrays(1,&vbo));
-    GLDebugger(glBindVertexArray(vbo);)
+   
 
 
         // create a vertex buffer
@@ -173,12 +172,15 @@ int main(void)
         // the size, means how many float that we are providing, in the position, we want to make a 2d graphic
         // hence, the size will be 2
         // normalize means if you want to trasfer the number (like the color, from 0 to 255) to floating number
-        // stride means how many bytes between each vertext (since, we have many things in one vertix, like color, texture, position)
+        // stride means how many bytes between each vertex (since, we have many things in one vertix, like color, texture, position)
         // pointer means, in a vertext, we have so many things right, so from position to color, (let say we have two floating number to represent the position, and one number represent the color)
         // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color, we need 8
         // in this case, the position is the first attribute, hence the pointer would be (const void*)0
         // if we want to get to the color, the pointer would be (const void*)8
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0);
+        VertexBufferLayout layout;
+        VertexArray va;
+        layout.Push<float>(2);
+        va.AddBuffer(vb, layout);
 
 
         // create index buffer
