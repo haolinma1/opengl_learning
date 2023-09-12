@@ -4,39 +4,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-
-// for debug
-// make a macro of asser to wrap both of the function ClearErrors and GLGetError so that the program will be terminate
-
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLDebugger(x) ClearErrors();\
-x;\
-ASSERT(GLGetError(#x,__FILE__,__LINE__))
-
-// #x, mean turn x into a string, __FILE__ get the file name, __LINE__ get the line number
-
-// debug for opengl
-// before a function (the function that we want to check)
-// we use a while loop to get all the error before this function
-// and then use the get error to check if this function has any error
-
-static void ClearErrors(){
-    if (glGetError()!=GL_NO_ERROR)
-    {
-
-    }
-}
-
-// we can also print the function name, file and line
-static bool GLGetError(const char* function,const char* file,unsigned int line) {
-    while (GLenum error=glGetError())
-    {
-        std::cout << "[Error]: " << error <<" Function: "<<function<<" File: "<<file<<" Line: "<<line << std::endl;
-        return false;
-    }
-    return true;
-}
-
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 // to return two string from the function getShader
 struct ShaderProgramSource {
     std::string vertex;
@@ -180,7 +150,7 @@ int main(void)
     // look at the position, if we want to draw a square,
     // the first triangle should be points 0,1,2
     // the second triangle should be 2,3,1
-    unsigned int IndexBuffer[] = {
+    unsigned int index[] = {
         0,1,2,
         2,3,0
     };
@@ -189,97 +159,86 @@ int main(void)
     unsigned int vbo;
     GLDebugger(glGenVertexArrays(1,&vbo));
     GLDebugger(glBindVertexArray(vbo);)
-        
-
-    unsigned int buffer;
-    // generate buffer for gpu to work with
-    // the buffer means the id that represent this buffer.
-    // so we can just pass in the integet buffer that represent the buffer that we are going to generate
-    glGenBuffers(1, &buffer);
-    // select the buffer that we have created
-    // this is the array of buffer, buffer is the id.
-    // GL_ARRAY_BUFFER target means that binding the buffer for vertex attribute data
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    // insert the data to this buffer.
-    // opengl know which buffer it need to insert the data by the first argument, which is GL_ARRAY_BUFFER 
-    glBufferData(GL_ARRAY_BUFFER, 4 *2* sizeof(float), position, GL_STATIC_DRAW);
-
-    // so bascially, in each vertext, we have multiple attributes like position, color, texture
-    // tell opengl what the layout of our data
-    // index means the index of attribute in your buffer that you want to use 
-    // let say, we have position in index 0, color in index 1, texture in index 2, so the index 0 means we 
-    // get the position
-    // the size, means how many float that we are providing, in the position, we want to make a 2d graphic
-    // hence, the size will be 2
-    // normalize means if you want to trasfer the number (like the color, from 0 to 255) to floating number
-    // stride means how many bytes between each vertext (since, we have many things in one vertix, like color, texture, position)
-    // pointer means, in a vertext, we have so many things right, so from position to color, (let say we have two floating number to represent the position, and one number represent the color)
-    // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color, we need 8
-    // in this case, the position is the first attribute, hence the pointer would be (const void*)0
-    // if we want to get to the color, the pointer would be (const void*)8
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0);
-
-    // get a new buffer for the index buffer
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    // GL_ELEMENT_ARRAY_BUFFER target is used for index data that defines the order in which vertices are rendered 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), IndexBuffer, GL_STATIC_DRAW);
-    
-    // initialze the two shader, vertex and fragment shader
-    ShaderProgramSource shaderFile = getShader("res/shader/Basic.shader");
-    
-    unsigned int shader = creatShader(shaderFile.vertex, shaderFile.fragment);
-    glUseProgram(shader);
-
-    // Uniform:
-    // must be after the glUserProgram
-    // need to get the location of that uniform first
-    GLDebugger(int location = glGetUniformLocation(shader, "u_Color"));
-    // 4 stands for how many floating number
-    // f stands for floating number
-    GLDebugger(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
 
-
-
-   //enable the vertext array
-    glEnableVertexAttribArray(0);
-
-    float r = 0.0f;
-    float increment = 0.05f;
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
+        // create a vertex buffer
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        VertexBuffer vb(position, 4 * 2 * sizeof(float));
 
-        // count means how many points we want to draw
-        // must be GL_UNSIGNED_INT
-        GLDebugger(glUniform4f(location, r, 0.3f, 0.8f, 1.0f))
-        GLDebugger(glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,NULL));
-        
-        if (r>1.0)
+        // so bascially, in each vertext, we have multiple attributes like position, color, texture
+        // tell opengl what the layout of our data
+        // index means the index of attribute in your buffer that you want to use 
+        // let say, we have position in index 0, color in index 1, texture in index 2, so the index 0 means we 
+        // get the position
+        // the size, means how many float that we are providing, in the position, we want to make a 2d graphic
+        // hence, the size will be 2
+        // normalize means if you want to trasfer the number (like the color, from 0 to 255) to floating number
+        // stride means how many bytes between each vertext (since, we have many things in one vertix, like color, texture, position)
+        // pointer means, in a vertext, we have so many things right, so from position to color, (let say we have two floating number to represent the position, and one number represent the color)
+        // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color, we need 8
+        // in this case, the position is the first attribute, hence the pointer would be (const void*)0
+        // if we want to get to the color, the pointer would be (const void*)8
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (const void*)0);
+
+
+        // create index buffer
+        IndexBuffer ib(index, 6);
+
+        // initialze the two shader, vertex and fragment shader
+        ShaderProgramSource shaderFile = getShader("res/shader/Basic.shader");
+
+        unsigned int shader = creatShader(shaderFile.vertex, shaderFile.fragment);
+        glUseProgram(shader);
+
+        // Uniform:
+        // must be after the glUserProgram
+        // need to get the location of that uniform first
+        GLDebugger(int location = glGetUniformLocation(shader, "u_Color"));
+        // 4 stands for how many floating number
+        // f stands for floating number
+        GLDebugger(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+
+
+
+
+        //enable the vertext array
+        glEnableVertexAttribArray(0);
+
+        float r = 0.0f;
+        float increment = 0.05f;
+
+        /* Loop until the user closes the window */
+        while (!glfwWindowShouldClose(window))
         {
-            increment = -0.05;
+            /* Render here */
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // count means how many points we want to draw
+            // must be GL_UNSIGNED_INT
+            GLDebugger(glUniform4f(location, r, 0.3f, 0.8f, 1.0f))
+                GLDebugger(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
+
+            if (r > 1.0)
+            {
+                increment = -0.05;
+            }
+            else if (r < 0.0)
+            {
+                increment = 0.05;
+            }
+            r += increment;
+
+
+            /* Swap front and back buffers */
+            glfwSwapBuffers(window);
+
+            /* Poll for and process events */
+            glfwPollEvents();
         }
-        else if (r<0.0)
-        {
-            increment = 0.05;
-        }
-        r += increment;
 
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
-
-    glDeleteProgram(shader);
-
+        glDeleteProgram(shader);
+    } // need to have this scope because after the glfwTerminate has been invoke, the opengl context will be destoryed
+    // and when the program delete the buffer, our glDebugger will return a false message.
     glfwTerminate();
     return 0;
 }
