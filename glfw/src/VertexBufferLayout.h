@@ -35,6 +35,10 @@ public:
 
 	VertexBufferLayout() { m_Stride = 0; };
 
+	// this call template specification
+	// the comlier will check what type have we passed in like Push<float>(count)
+	// then it will directly go to the second one
+	// if no type matches, then it will go to the base class which have assert(false).
 	template<typename T>
 	void Push(unsigned int count) {
 		assert(false);

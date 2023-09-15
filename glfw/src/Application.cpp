@@ -9,102 +9,8 @@
 #include "IndexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "VertexArray.h"
-// to return two string from the function getShader
-struct ShaderProgramSource {
-    std::string vertex;
-    std::string fragment;
-};
+#include "Shader.h"
 
-
-// read the shader source from the path
-static ShaderProgramSource getShader(const std::string& ShaderPath) {
-    std::ifstream readfile(ShaderPath);
-    std::string line;
-
-    enum class Shadertype {
-        none = -1, vertex=0,fragment=1
-    };
-
-    std::stringstream ss[2];
-    Shadertype type = Shadertype::none;
-    while (getline(readfile,line))
-    {   
-        // find the type of shader
-        if (line.find("#shader")!=std::string::npos)
-        {
-            if (line.find("vertex")!=std::string::npos)
-            {
-                // find the vertex
-                type = Shadertype::vertex;
-            }
-            else if (line.find("fragment") != std::string::npos)
-            {
-                // find the fragment
-                type = Shadertype::fragment;
-            }
-        }
-        else
-        {
-            ss[(int)type] << line << "\n";
-        }
-    }
-    // return a struct
-    return { ss[0].str(),ss[1].str() };
-}
-
-
-
-static unsigned int complieShader(unsigned int type, const std::string& source) {
-    // glCreateShader creates an empty shader object and returns a non-zero value by which it can be referenced
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    // count means that how many string that you want to pass to this function
-    // src means the address of the array of the string
-    // NULL means that we don't have the array, hence just one string
-    glShaderSource(id,1,&src,nullptr);
-    glCompileShader(id);
-
-    // TODO handle error
-    int result;
-    glGetShaderiv(id, GL_LINK_STATUS, &result);
-    if (result==GL_FALSE)
-    {
-        // get the length of error message first
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char* message = new char[length];
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "Fail to complie: " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << std::endl;
-        std::cout << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-
-
-    return id;
-
-
-}
-
-static unsigned int creatShader(const std::string& vertexShader, const std::string& fragmentShader) {
-    // create an empty program object and return a non-zero number that we can use it to reference
-    unsigned int program = glCreateProgram();
-
-    unsigned int vs = complieShader(GL_VERTEX_SHADER,vertexShader);
-    unsigned int fs = complieShader(GL_FRAGMENT_SHADER,fragmentShader);
-
-    // attach shader to our program
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 
 int main(void)
@@ -174,9 +80,11 @@ int main(void)
         // normalize means if you want to trasfer the number (like the color, from 0 to 255) to floating number
         // stride means how many bytes between each vertex (since, we have many things in one vertix, like color, texture, position)
         // pointer means, in a vertext, we have so many things right, so from position to color, (let say we have two floating number to represent the position, and one number represent the color)
-        // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color, we need 8
+        // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color(which is the next vertex), we need 8
         // in this case, the position is the first attribute, hence the pointer would be (const void*)0
         // if we want to get to the color, the pointer would be (const void*)8
+        // for function glVertexAttribPointer
+
         VertexBufferLayout layout;
         VertexArray va;
         layout.Push<float>(2);
@@ -186,20 +94,9 @@ int main(void)
         // create index buffer
         IndexBuffer ib(index, 6);
 
-        // initialze the two shader, vertex and fragment shader
-        ShaderProgramSource shaderFile = getShader("res/shader/Basic.shader");
-
-        unsigned int shader = creatShader(shaderFile.vertex, shaderFile.fragment);
-        glUseProgram(shader);
-
-        // Uniform:
-        // must be after the glUserProgram
-        // need to get the location of that uniform first
-        GLDebugger(int location = glGetUniformLocation(shader, "u_Color"));
-        // 4 stands for how many floating number
-        // f stands for floating number
-        GLDebugger(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
-
+        Shader shader("res/shader/Basic.shader");
+        shader.Bind();
+        shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
 
 
@@ -217,7 +114,7 @@ int main(void)
 
             // count means how many points we want to draw
             // must be GL_UNSIGNED_INT
-            GLDebugger(glUniform4f(location, r, 0.3f, 0.8f, 1.0f))
+            GLDebugger(shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f))
                 GLDebugger(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
 
             if (r > 1.0)
@@ -238,7 +135,6 @@ int main(void)
             glfwPollEvents();
         }
 
-        glDeleteProgram(shader);
     } // need to have this scope because after the glfwTerminate has been invoke, the opengl context will be destoryed
     // and when the program delete the buffer, our glDebugger will return a false message.
     glfwTerminate();
