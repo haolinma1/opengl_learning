@@ -10,7 +10,7 @@
 #include "VertexBufferLayout.h"
 #include "VertexArray.h"
 #include "Shader.h"
-
+#include "Texture.h"
 
 
 int main(void)
@@ -44,11 +44,14 @@ int main(void)
     }
 
     std::cout << glGetString(GL_VERSION) << std::endl;
+    // add the texture coordiante for the texture to be draw
+    // Texture coordinates specify the point in the texture image
+    // that will correspond to the vertex you are specifying them for
     float position[] = {
-         -0.5f, -0.5f, // 0
-          0.5f,  -0.5f, // 1
-          0.5f,  0.5f,  // 2
-          -0.5f,0.5f, // 3
+         -0.5f, -0.5f, 0.0f, 0.0f, // 0
+          0.5f, -0.5f, 1.0f, 0.0f,// 1
+          0.5f,  0.5f, 1.0f,1.0f, // 2
+          -0.5f,0.5f, 0.0f,1.0f// 3
     };
 
     // delete the duplicate points
@@ -68,10 +71,13 @@ int main(void)
 
         // create a vertex buffer
     {
-        VertexBuffer vb(position, 4 * 2 * sizeof(float));
+        VertexBuffer vb(position, 4 * 4 * sizeof(float));
 
         VertexBufferLayout layout;
         VertexArray va;
+        // for vertex itself
+        layout.Push<float>(2);
+        // this is for texture layout
         layout.Push<float>(2);
         va.AddBuffer(vb, layout);
 
@@ -82,7 +88,11 @@ int main(void)
         Shader shader("res/shader/Basic.shader");
         shader.Bind();
         shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
-
+        Texture texture("res/Texture/sample2.png");
+        texture.Bind();
+        // 0 stands for the slot, which have the same number as texture.Bind()
+        shader.SetUniform1i("u_Texture", 0);
+        
 
 
         //enable the vertext array

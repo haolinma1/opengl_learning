@@ -115,6 +115,13 @@ void Shader::UnBind()const {
 
 }
 
+void Shader::SetUniform1f(const std::string& name, float value) {
+    GLDebugger(glUniform1f(GetUniformLocation(name), value));
+}
+void Shader::SetUniform1i(const std::string& name, int value) {
+    GLDebugger(glUniform1i(GetUniformLocation(name), value));
+}
+
 // 4 stands for how many floating number
 // for color, we need 4 floating number
 void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) {

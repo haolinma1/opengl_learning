@@ -20,7 +20,9 @@ public:
 
 	void Bind()const;
 	void UnBind()const;
-
+	// set uniform
+	void SetUniform1f(const std::string& name, float value);
+	void SetUniform1i(const std::string& name, int value);
 	// 4 stands for how many floating number
 	// for color, we need 4 floating number
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
