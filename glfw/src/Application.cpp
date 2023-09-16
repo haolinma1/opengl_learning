@@ -70,21 +70,6 @@ int main(void)
     {
         VertexBuffer vb(position, 4 * 2 * sizeof(float));
 
-        // so bascially, in each vertext, we have multiple attributes like position, color, texture
-        // tell opengl what the layout of our data
-        // index means the index of attribute in your buffer that you want to use 
-        // let say, we have position in index 0, color in index 1, texture in index 2, so the index 0 means we 
-        // get the position
-        // the size, means how many float that we are providing, in the position, we want to make a 2d graphic
-        // hence, the size will be 2
-        // normalize means if you want to trasfer the number (like the color, from 0 to 255) to floating number
-        // stride means how many bytes between each vertex (since, we have many things in one vertix, like color, texture, position)
-        // pointer means, in a vertext, we have so many things right, so from position to color, (let say we have two floating number to represent the position, and one number represent the color)
-        // we all know that in 32-bit system, 4 bytes represent a pointer, hence to get to the pointer of that color(which is the next vertex), we need 8
-        // in this case, the position is the first attribute, hence the pointer would be (const void*)0
-        // if we want to get to the color, the pointer would be (const void*)8
-        // for function glVertexAttribPointer
-
         VertexBufferLayout layout;
         VertexArray va;
         layout.Push<float>(2);
@@ -105,17 +90,18 @@ int main(void)
 
         float r = 0.0f;
         float increment = 0.05f;
-
+        Renderer render;
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
-            glClear(GL_COLOR_BUFFER_BIT);
+            render.Clear();
 
             // count means how many points we want to draw
             // must be GL_UNSIGNED_INT
-            GLDebugger(shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f))
-                GLDebugger(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL));
+          
+            shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+            render.Draw(ib, va, shader);
 
             if (r > 1.0)
             {

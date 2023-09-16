@@ -1,8 +1,10 @@
 #pragma once
 #include"VertexBuffer.h"
-#include "VertexBufferLayout.h"
 
-
+// don't include the VertexBufferLayout header file 
+// because we need to prevent cyclic includes 
+// in header file, it don't need to actually need to know the VertexBufferLayout class.
+class VertexBufferLayout;
 class VertexArray
 {
 private:

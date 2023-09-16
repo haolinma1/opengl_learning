@@ -26,3 +26,24 @@ bool GLGetError(const char* function, const char* file, unsigned int line) {
     }
     return true;
 }
+
+
+Renderer::Renderer()
+{
+}
+
+Renderer::~Renderer()
+{
+}
+
+
+void Renderer :: Draw(const IndexBuffer& ib, const VertexArray& va, const Shader& shader)const {
+    shader.Bind();
+    va.Bind();
+    ib.Bind();
+    GLDebugger(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, NULL));
+}
+
+void Renderer::Clear()const {
+    GLDebugger(glClear(GL_COLOR_BUFFER_BIT));
+}
